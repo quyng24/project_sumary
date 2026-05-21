@@ -21,6 +21,12 @@
       summary: 'Ứng dụng diễn họa cây thông Noel bằng mã nhị phân và hiệu ứng ánh sáng. Showcase khả năng render dữ liệu động kết hợp với các hiệu ứng thị giác theo mùa.'
     },
     {
+      title: 'Tym Animate',
+      href: resolve('/tym'),
+      tag: 'UI Motion',
+      summary: 'Hiệu ứng trái tym chuyển động'
+    },
+    {
       title: 'Game Tetris',
       href: resolve('/tetris'),
       tag: 'Game',
@@ -45,58 +51,9 @@
       summary: 'Bảng tính trực tuyến hỗ trợ công thức toán học và tham chiếu ô. Trình diễn kỹ thuật quản lý dữ liệu hiệu suất cao với SvelteMap và engine tính toán công thức động.'
     }
 ];
-
-  const backgroundStars = Array.from({ length: 22 }, (_, index) => ({
-    size: `${Math.random() * 2.4 + 1}px`,
-    top: `${Math.random() * 100}%`,
-    left: `${Math.random() * 100}%`,
-    opacity: (Math.random() * 0.55 + 0.2).toFixed(2),
-    duration: `${Math.random() * 4 + 3}s`,
-    delay: `${Math.random() * 4}s`,
-    twinkle: index % 3 === 0
-  }));
-
-  const meteors = Array.from({ length: 5 }, () => ({
-    top: `${Math.random() * 42 - 8}vh`,
-    left: `${Math.random() * 35 + 72}vw`,
-    length: `${Math.random() * 90 + 90}px`,
-    duration: `${Math.random() * 3.4 + 6.2}s`,
-    delay: `${Math.random() * 10}s`,
-    angle: `${Math.random() * 12 - 38}deg`,
-    distanceX: `${Math.random() * -30 - 92}vw`,
-    distanceY: `${Math.random() * 26 + 56}vh`
-  }));
 </script>
 
-<svelte:head>
-  <title>Svelte Showcase Portfolio | Projects Summary</title>
-  <meta
-    name="description"
-    content="Trang tổng hợp các dự án Svelte với giao diện showcase và điều hướng nhanh vào từng project."
-  />
-</svelte:head>
 
-<div class="sky-scene" aria-hidden="true">
-  <div class="sky-haze"></div>
-  <div class="starfield">
-    {#each backgroundStars as star, index (index)}
-      <span
-        class="bg-star"
-        class:twinkle={star.twinkle}
-        style={`--star-size:${star.size}; --star-top:${star.top}; --star-left:${star.left}; --star-opacity:${star.opacity}; --twinkle-duration:${star.duration}; --twinkle-delay:${star.delay};`}
-      ></span>
-    {/each}
-  </div>
-
-  <div class="meteor-layer">
-    {#each meteors as meteor, index (index)}
-      <span
-        class="meteor"
-        style={`--meteor-top:${meteor.top}; --meteor-left:${meteor.left}; --meteor-length:${meteor.length}; --meteor-duration:${meteor.duration}; --meteor-delay:${meteor.delay}; --meteor-angle:${meteor.angle}; --meteor-distance-x:${meteor.distanceX}; --meteor-distance-y:${meteor.distanceY};`}
-      ></span>
-    {/each}
-  </div>
-</div>
 
 <section class="showcase-shell">
   <div class="hero-copy">
@@ -136,144 +93,14 @@
 
 <style>
   @import url('https://fonts.googleapis.com/css2?family=Inter:wght@400;500;600;700;800&display=swap');
-
-  :global(body) {
-    min-height: 100vh;
-    margin: 0;
-    background: 
-      radial-gradient(circle at 18% 14%, rgba(56, 128, 255, 0.18), transparent 28%),
-      radial-gradient(circle at 82% 12%, rgba(255, 158, 63, 0.13), transparent 26%),
-      radial-gradient(circle at 50% 0%, rgba(104, 121, 255, 0.08), transparent 34%),
-      linear-gradient(180deg, #02050b 0%, #07111d 48%, #03070d 100%);
-    color: #e2e8f0;
-    font-family: 'Inter', -apple-system, BlinkMacSystemFont, "Segoe UI", Roboto, sans-serif;
-    -webkit-font-smoothing: antialiased;
-    overflow-x: hidden;
-  }
-
-  .sky-scene {
-    position: fixed;
-    inset: 0;
-    overflow: hidden;
-    pointer-events: none;
-    z-index: 0;
-    contain: layout paint style;
-  }
-
-  .sky-haze {
-    position: absolute;
-    inset: 0;
-    background:
-      radial-gradient(circle at 20% 20%, rgba(90, 155, 255, 0.12), transparent 24%),
-      radial-gradient(circle at 80% 18%, rgba(255, 186, 120, 0.08), transparent 22%),
-      radial-gradient(circle at 50% 45%, rgba(255, 255, 255, 0.04), transparent 30%);
-    opacity: 0.85;
-  }
-
-  .starfield,
-  .meteor-layer {
-    position: absolute;
-    inset: 0;
-  }
-
-  .bg-star {
-    position: absolute;
-    top: var(--star-top);
-    left: var(--star-left);
-    width: var(--star-size);
-    height: var(--star-size);
-    border-radius: 999px;
-    background: rgba(255, 255, 255, 0.95);
-    opacity: var(--star-opacity);
-  }
-
-  .bg-star.twinkle {
-    animation: twinkle var(--twinkle-duration) ease-in-out var(--twinkle-delay) infinite;
-  }
-
-  .meteor {
-    position: absolute;
-    top: var(--meteor-top);
-    left: var(--meteor-left);
-    width: var(--meteor-length);
-    height: 2px;
-    border-radius: 999px;
-    background: linear-gradient(
-      90deg,
-      rgba(255, 255, 255, 1) 0%,
-      rgba(218, 237, 255, 0.72) 28%,
-      rgba(167, 208, 255, 0.2) 72%,
-      rgba(255, 255, 255, 0) 100%
-    );
-    transform: rotate(var(--meteor-angle));
-    transform-origin: left center;
-    opacity: 0;
-    animation: meteor-fall var(--meteor-duration) ease-in var(--meteor-delay) infinite;
-    will-change: transform, opacity;
-  }
-
-  .meteor::before {
-    content: '';
-    position: absolute;
-    top: 50%;
-    left: -1px;
-    width: 8px;
-    height: 8px;
-    border-radius: 50%;
-    background: radial-gradient(circle, rgba(255, 255, 255, 1) 0%, rgba(163, 210, 255, 0.35) 72%, transparent 100%);
-    transform: translateY(-50%);
-  }
-
-  @keyframes twinkle {
-    0% {
-      opacity: calc(var(--star-opacity) * 0.55);
-      transform: scale(0.9);
-    }
-
-    50% {
-      opacity: var(--star-opacity);
-      transform: scale(1.3);
-    }
-
-    100% {
-      opacity: calc(var(--star-opacity) * 0.55);
-      transform: scale(0.95);
-    }
-  }
-
-  @keyframes meteor-fall {
-    0% {
-      opacity: 0;
-      transform: translate3d(0, 0, 0) rotate(var(--meteor-angle)) scaleX(0.65);
-    }
-
-    8% {
-      opacity: 1;
-    }
-
-    70% {
-      opacity: 1;
-    }
-
-    100% {
-      opacity: 0;
-      transform:
-        translate3d(var(--meteor-distance-x), var(--meteor-distance-y), 0)
-        rotate(var(--meteor-angle))
-        scaleX(1);
-    }
-  }
-
-  /* --- Layout chính --- */
   .showcase-shell {
     position: relative;
-    z-index: 1; /* Nằm trên background */
+    z-index: 1;
     width: min(1160px, calc(100% - 3rem));
     margin: 0 auto;
     padding: 6rem 0 8rem;
   }
 
-  /* --- Hero Section --- */
   .hero-copy {
     max-width: 55rem;
     margin-bottom: 4rem;
@@ -284,7 +111,7 @@
 
   .eyebrow {
     margin: 0 0 1rem;
-    color: #4790ff; /* Màu xanh accent */
+    color: #4790ff;
     font-size: 0.85rem;
     font-weight: 700;
     letter-spacing: 0.25em;
@@ -323,30 +150,25 @@
     color: inherit;
     border-radius: 2rem;
     position: relative;
-    /* Hiệu ứng trồi sụt nhẹ ban đầu theo index */
     transform: translateY(calc(var(--card-index) * 8px));
     transition: transform 0.3s cubic-bezier(0.34, 1.56, 0.64, 1), box-shadow 0.3s ease;
   }
 
-  /* Hover effect cho cả card */
   .project-card:hover {
     transform: translateY(-8px) scale(1.02);
   }
 
-  /* Lớp nền mờ Glassmorphism và viền gradient */
   .card-inner {
     display: grid;
     grid-template-rows: auto 1fr auto;
     gap: 2.5rem;
     min-height: 350px;
     padding: 2rem;
-    background: rgba(255, 255, 255, 0.03); /* Siêu trong suốt */
-    backdrop-filter: blur(10px); /* Làm mờ hậu cảnh */
+    background: rgba(255, 255, 255, 0.03);
+    backdrop-filter: blur(10px);
     -webkit-backdrop-filter: blur(10px);
     border-radius: 2rem;
     border: 1px solid rgba(255, 255, 255, 0.06);
-    
-    /* Viền gradient tinh tế khi hover */
     position: relative;
     overflow: hidden;
   }
@@ -372,8 +194,8 @@
     align-items: center;
     padding: 0.5rem 1rem;
     border-radius: 999px;
-    background: rgba(71, 144, 255, 0.1); /* Nền xanh nhạt */
-    color: #60a5fa; /* Chữ xanh nổi bật */
+    background: rgba(71, 144, 255, 0.1);
+    color: #60a5fa;
     font-size: 0.75rem;
     font-weight: 700;
     letter-spacing: 0.1em;
@@ -395,7 +217,7 @@
 
   .project-card:hover .arrow-circle {
     background: #4790ff;
-    transform: rotate(-45deg); /* Xoay mũi tên khi hover */
+    transform: rotate(-45deg);
   }
 
   .arrow {
@@ -438,7 +260,7 @@
 
   .path-text {
     color: #64748b;
-    font-family: 'Courier New', Courier, monospace; /* Font monospace cho path */
+    font-family: 'Courier New', Courier, monospace;
     font-weight: 400;
   }
 
@@ -450,7 +272,7 @@
     }
     
     .project-card {
-        transform: none; /* Bỏ transform index trên tablet */
+        transform: none;
     }
   }
 
@@ -476,14 +298,6 @@
     .card-body h2 {
         font-size: 1.8rem;
     }
-
-    .meteor:nth-child(n + 3) {
-      display: none;
-    }
-
-    .meteor {
-      animation-duration: calc(var(--meteor-duration) + 1.8s);
-    }
   }
 
   @media (max-width: 480px) {
@@ -498,14 +312,4 @@
     }
   }
 
-  @media (prefers-reduced-motion: reduce) {
-    .bg-star,
-    .meteor {
-      animation: none;
-    }
-
-    .meteor {
-      opacity: 0.2;
-    }
-  }
 </style>
