@@ -1,206 +1,125 @@
 <script lang="ts">
-  import { onMount } from 'svelte';
-  import BackHome from '$lib/components/BackHome.svelte';
+	import { onMount } from 'svelte';
+	import BackHome from '$lib/components/BackHome.svelte';
+	import Digit from '$lib/components/Digit.svelte';
 
-  interface DigitState {
-    value: string;
-    flipping: boolean;
-  }
+	let time = $state(new Date());
 
-  type DigitKey =
-    | 'hourTens'
-    | 'hourOnes'
-    | 'minuteTens'
-    | 'minuteOnes'
-    | 'secondTens'
-    | 'secondOnes';
+	onMount(() => {
+		const interval = setInterval(() => {
+			time = new Date();
+		}, 1000);
+		return () => clearInterval(interval);
+	});
 
-  let digits = $state<Record<DigitKey, DigitState>>({
-    hourTens:   { value: '0', flipping: false },
-    hourOnes:   { value: '0', flipping: false },
-    minuteTens: { value: '0', flipping: false },
-    minuteOnes: { value: '0', flipping: false },
-    secondTens: { value: '0', flipping: false },
-    secondOnes: { value: '0', flipping: false },
-  });
+	const getDigits = (t: Date) => {
+		const h = String(t.getHours()).padStart(2, '0');
+		const m = String(t.getMinutes()).padStart(2, '0');
+		const s = String(t.getSeconds()).padStart(2, '0');
+		return [h[0], h[1], m[0], m[1], s[0], s[1]];
+	};
 
-  function flipDigit(key: DigitKey, newVal: string): void {
-    if (digits[key].value !== newVal) {
-      digits[key].value = newVal;
-      digits[key].flipping = true;
-
-      setTimeout(() => {
-        digits[key].flipping = false;
-      }, 600);
-    }
-  }
-
-  function updateClock(): void {
-    const now = new Date();
-    const hours   = String(now.getHours()).padStart(2, '0');
-    const minutes = String(now.getMinutes()).padStart(2, '0');
-    const seconds = String(now.getSeconds()).padStart(2, '0');
-
-    flipDigit('hourTens',   hours[0]);
-    flipDigit('hourOnes',   hours[1]);
-    flipDigit('minuteTens', minutes[0]);
-    flipDigit('minuteOnes', minutes[1]);
-    flipDigit('secondTens', seconds[0]);
-    flipDigit('secondOnes', seconds[1]);
-  }
-
-  onMount(() => {
-    updateClock();
-    const interval = window.setInterval(updateClock, 1000);
-
-    return () => {
-      window.clearInterval(interval);
-    };
-  });
+	let d = $derived(getDigits(time));
 </script>
 
-<BackHome />
-
 <div class="clock-page">
-  <div class="flip-clock">
-    <div class="flip-unit">
-      <div class="digit" class:flip={digits['hourTens'].flipping}>{digits['hourTens'].value}</div>
-      <div class="digit" class:flip={digits['hourOnes'].flipping}>{digits['hourOnes'].value}</div>
-    </div>
-    <div class="separator">:</div>
-    <div class="flip-unit">
-      <div class="digit" class:flip={digits['minuteTens'].flipping}>{digits['minuteTens'].value}</div>
-      <div class="digit" class:flip={digits['minuteOnes'].flipping}>{digits['minuteOnes'].value}</div>
-    </div>
-    <div class="separator">:</div>
-    <div class="flip-unit">
-      <div class="digit" class:flip={digits['secondTens'].flipping}>{digits['secondTens'].value}</div>
-      <div class="digit" class:flip={digits['secondOnes'].flipping}>{digits['secondOnes'].value}</div>
-    </div>
-  </div>
+	<header class="top-nav">
+		<BackHome />
+		<div class="title">Mechanical Flip Clock</div>
+	</header>
+
+	<main class="clock-content">
+		<div class="clock-container">
+			<div class="group">
+				<Digit value={d[0]} />
+				<Digit value={d[1]} />
+			</div>
+
+			<div class="separator"></div>
+
+			<div class="group">
+				<Digit value={d[2]} />
+				<Digit value={d[3]} />
+			</div>
+
+			<div class="separator"></div>
+
+			<div class="group">
+				<Digit value={d[4]} />
+				<Digit value={d[5]} />
+			</div>
+		</div>
+	</main>
 </div>
 
 <style>
-  :global(body) {
-    background-color: #000;
-    color: #fff;
-    font-family: Arial, Helvetica, sans-serif;
-    margin: 0;
-  }
+	.clock-page {
+		position: fixed;
+		inset: 0;
+		background-color: #050505;
+		display: flex;
+		flex-direction: column;
+		color: white;
+		font-family: 'Inter', sans-serif;
+	}
 
-  .clock-page {
-    display: flex;
-    align-items: center;
-    justify-content: center;
-    min-height: 100vh;
-    min-height: 100svh;
-    padding: 5.5rem 1rem 1rem;
-    background-color: #000;
-    box-sizing: border-box;
-  }
+	.top-nav {
+		height: 60px;
+		display: flex;
+		align-items: center;
+		justify-content: space-between;
+		padding: 0 1.5rem;
+		background: #0a0a0a;
+		border-bottom: 1px solid #1a1a1a;
+	}
 
-  .flip-clock {
-    display: flex;
-    align-items: center;
-    justify-content: center;
-    gap: 0.5rem;
-    font-size: 10rem;
-  }
+	.title {
+		font-size: 0.7rem;
+		letter-spacing: 0.3em;
+		text-transform: uppercase;
+		color: #555;
+	}
 
-  .flip-unit {
-    display: flex;
-    gap: 0.65rem;
-    position: relative;
-    perspective: 1000px;
-  }
+	.clock-content {
+		flex: 1;
+		display: flex;
+		align-items: center;
+		justify-content: center;
+	}
 
-  .digit {
-    display: flex;
-    align-items: center;
-    justify-content: center;
-    width: 200px;
-    height: 250px;
-    line-height: 150px;
-    background: #333;
-    border-radius: 10px;
-    position: relative;
-    transform-style: preserve-3d;
-    transition: transform 0.6s;
-    box-shadow: 0 20px 45px rgba(0, 0, 0, 0.35);
-  }
+	.clock-container {
+		display: flex;
+		align-items: center;
+		gap: 2rem; /* Khoảng cách giữa Giờ : Phút : Giây */
+	}
 
-  .separator {
-    font-size: 10rem;
-    line-height: 150px;
-    margin: 0 0.2rem;
-  }
+	.group {
+		display: flex;
+		gap: 0.5rem; /* Khoảng cách giữa 2 chữ số trong một cặp */
+	}
 
-  .digit.flip {
-    animation: flip 0.6s;
-  }
+	.separator {
+		display: flex;
+		flex-direction: column;
+		gap: 1.5rem;
+	}
 
-  @keyframes flip {
-    0%   { transform: rotateX(0deg); }
-    50%  { transform: rotateX(90deg); }
-    100% { transform: rotateX(0deg); }
-  }
+	.separator::before,
+	.separator::after {
+		content: '';
+		width: 10px;
+		height: 10px;
+		background: #222;
+		border-radius: 50%;
+	}
 
-  /* Mobile */
-  @media only screen and (max-width: 46.185em) {
-    .clock-page {
-      padding: 6rem 0.9rem 1.5rem;
-    }
-
-    .flip-clock {
-      flex-direction: column;
-      gap: 0.75rem;
-      font-size: 4.5rem;
-    }
-
-    .flip-unit {
-      gap: 0.8rem;
-    }
-
-    .digit {
-      width: 110px;
-      height: 132px;
-      line-height: 1;
-      font-size: 4.5rem;
-    }
-
-    .separator {
-      font-size: 2.4rem;
-      line-height: 1;
-      margin: 0;
-    }
-  }
-
-  /* Tablet */
-  @media only screen and (min-width: 46.25em) and (max-width: 63.9375em) {
-    .clock-page {
-      padding-top: 6.5rem;
-    }
-
-    .flip-clock {
-      gap: 0.7rem;
-      font-size: 6rem;
-    }
-
-    .flip-unit {
-      gap: 0.75rem;
-    }
-
-    .digit {
-      width: 130px;
-      height: 160px;
-      line-height: 1;
-      font-size: 6rem;
-    }
-
-    .separator {
-      font-size: 4.5rem;
-      line-height: 1;
-      margin: 0 0.1rem;
-    }
-  }
+	@media (max-width: 850px) {
+		.clock-container {
+			flex-direction: column;
+			gap: 3rem;
+		}
+		.separator {
+			display: none;
+		}
+	}
 </style>

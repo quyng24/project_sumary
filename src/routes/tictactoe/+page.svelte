@@ -99,15 +99,6 @@
 </div>
 
 <style>
-    :global(body) {
-        margin: 0;
-        background: #0f0c29;
-        background: linear-gradient(to bottom, #24243e, #0f0c29, #000000);
-        color: white;
-        font-family: 'Segoe UI', Roboto, Helvetica, Arial, sans-serif;
-        overflow: hidden;
-    }
-
     .page {
         height: 100vh;
         display: flex;

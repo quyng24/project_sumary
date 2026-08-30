@@ -67,13 +67,6 @@
 </div>
 
 <style>
-	:global(body) {
-		margin: 0;
-		background: #101227;
-		font-size: 12px;
-		font-family: Arial, Helvetica, sans-serif;
-	}
-
 	.wrapper {
 		width: 100%;
 		min-height: 100vh;

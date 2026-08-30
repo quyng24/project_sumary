@@ -36,8 +36,15 @@ import { onMount } from 'svelte';
             return new Point(this.x, this.y);
         }
 
-        length(len?: number) {
+        length(len?: number): Point | number {
             if (len === undefined) return Math.sqrt(this.x * this.x + this.y * this.y);
+            this.normalize();
+            this.x *= len;
+            this.y *= len;
+            return this;
+        }
+
+        setLength(len: number): Point {
             this.normalize();
             this.x *= len;
             this.y *= len;
@@ -189,7 +196,7 @@ import { onMount } from 'svelte';
             for (let i = 0; i < amount; i++) {
                 const t = Math.PI - 2 * Math.PI * Math.random();
                 const pos = pointOnHeart(t);
-                const dir = pos.clone().length(settings.particles.velocity);
+                const dir = pos.clone().setLength(settings.particles.velocity);
                 pool.add(
                     canvas!.width / 2 + pos.x,
                     canvas!.height / 2 - pos.y,
@@ -219,26 +226,27 @@ import { onMount } from 'svelte';
     });
 </script>
 
-<div>
+<div class="tym-wrapper">
     <BackHome/>
     <canvas bind:this={canvas}></canvas>
 </div>
 
-
 <style>
-    :global(html, body) {
-        margin: 0;
-        padding: 0;
-        width: 100%;
-        height: 100%;
+    .tym-wrapper {
+        position: fixed;
+        inset: 0;
+        width: 100vw;
+        height: 100vh;
         overflow: hidden;
-        background: #000;
+        background: #000000;
+        z-index: 0;
     }
 
     canvas {
-        position: fixed;
+        position: absolute;
         inset: 0;
         width: 100%;
         height: 100%;
+        display: block;
     }
 </style>

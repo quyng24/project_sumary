@@ -417,14 +417,6 @@
 <canvas bind:this={canvas} class:visible={gameStarted}></canvas>
 
 <style>
-	:global(body) {
-		margin: 0;
-		background: #232946;
-		color: #fffffe;
-		font-family: 'Inter', system-ui, sans-serif;
-		overflow: hidden;
-	}
-
 	.start-screen {
 		position: absolute;
 		top: 50%;

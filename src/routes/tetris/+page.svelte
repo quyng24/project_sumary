@@ -353,160 +353,160 @@
 	});
 </script>
 
-<div class="app">
-	<BackHome/>
-	<header>
-		<span class="logo">TETRIS</span>
-		<button
-			class="sound-btn"
-			class:muted={!soundOn}
-			onclick={() => soundOn = !soundOn}
-			title={soundOn ? 'Tắt âm' : 'Bật âm'}
-		>
-			{soundOn ? '🔊' : '🔇'}
-		</button>
-	</header>
+<div class="tetris-page">
+    <BackHome/>
+    
+    <div class="game-container">
+        <header>
+            <span class="logo">TETRIS</span>
+            <button
+                class="sound-btn"
+                class:muted={!soundOn}
+                onclick={() => soundOn = !soundOn}
+                title={soundOn ? 'Tắt âm' : 'Bật âm'}
+            >
+                {soundOn ? '🔊' : '🔇'}
+            </button>
+        </header>
 
-	<main>
-		<!-- Board -->
-		<div class="board-wrap">
-			<canvas bind:this={canvas}></canvas>
-			{#if gameOver}
-				<div class="overlay">
-					<p class="over-title">GAME OVER</p>
-					<p class="over-score">Score: {score}</p>
-					<button class="btn-play" onclick={startGame}>Chơi lại</button>
-				</div>
-			{/if}
-			{#if isPaused && !gameOver}
-				<div class="overlay">
-					<p class="over-title pause-title">TẠM DỪNG</p>
-					<p class="over-score">Score: {score}</p>
-					<button class="btn-play" onclick={togglePause}>Tiếp tục</button>
-				</div>
-			{/if}
-			{#if !isPlaying && !gameOver}
-				<div class="overlay start">
-					<p class="over-title">TETRIS</p>
-					<button class="btn-play" onclick={startGame}>Bắt đầu</button>
-				</div>
-			{/if}
-		</div>
+        <main>
+            <!-- Board -->
+            <div class="board-wrap">
+                <canvas bind:this={canvas}></canvas>
+                {#if gameOver}
+                    <div class="overlay">
+                        <p class="over-title">GAME OVER</p>
+                        <p class="over-score">Score: {score}</p>
+                        <button class="btn-play" onclick={startGame}>Chơi lại</button>
+                    </div>
+                {/if}
+                {#if isPaused && !gameOver}
+                    <div class="overlay">
+                        <p class="over-title pause-title">TẠM DỪNG</p>
+                        <p class="over-score">Score: {score}</p>
+                        <button class="btn-play" onclick={togglePause}>Tiếp tục</button>
+                    </div>
+                {/if}
+                {#if !isPlaying && !gameOver}
+                    <div class="overlay start">
+                        <p class="over-title">TETRIS</p>
+                        <button class="btn-play" onclick={startGame}>Bắt đầu</button>
+                    </div>
+                {/if}
+            </div>
 
-		<!-- Sidebar -->
-		<aside class="sidebar">
-			<div class="score-box">
-				<span class="label">SCORE</span>
-				<span class="value">{score}</span>
-			</div>
+            <!-- Sidebar -->
+            <aside class="sidebar">
+                <div class="score-box">
+                    <span class="label">SCORE</span>
+                    <span class="value">{score}</span>
+                </div>
 
-			<div class="hint-box">
-				<p>↑ Xoay</p>
-				<p>← → Di chuyển</p>
-				<p>↓ Rơi nhanh</p>
-				<p>Space Tạm dừng</p>
-			</div>
+                <div class="hint-box">
+                    <p>↑ Xoay</p>
+                    <p>← → Di chuyển</p>
+                    <p>↓ Rơi nhanh</p>
+                    <p>Space Tạm dừng</p>
+                </div>
 
-			<div class="btn-group">
-				{#if isPlaying && !gameOver}
-					<button class="btn-pause full" onclick={togglePause}>
-						{isPaused ? '▶ Tiếp tục' : '⏸ Tạm dừng'}
-					</button>
-				{/if}
-				<button class="btn-play full" onclick={startGame}>
-					{isPlaying ? 'Restart' : 'Play'}
-				</button>
-			</div>
+                <div class="btn-group">
+                    {#if isPlaying && !gameOver}
+                        <button class="btn-pause full" onclick={togglePause}>
+                            {isPaused ? '▶ Tiếp tục' : '⏸ Tạm dừng'}
+                        </button>
+                    {/if}
+                    <button class="btn-play full" onclick={startGame}>
+                        {isPlaying ? 'Restart' : 'Play'}
+                    </button>
+                </div>
+            </aside>
+        </main>
 
-			<!-- Mobile controls -->
-			<div class="mobile-controls">
-				<div class="row">
-					<button onclick={rotate}>↑</button>
-				</div>
-				<div class="row">
-					<button onclick={moveLeft}>←</button>
-					<button onclick={moveDown}>↓</button>
-					<button onclick={moveRight}>→</button>
-				</div>
-			</div>
-		</aside>
-	</main>
+        <!-- Mobile controls moved out of sidebar for better layout on small screens -->
+        <div class="mobile-controls">
+            <div class="row">
+                <button onclick={rotate}>↑</button>
+            </div>
+            <div class="row">
+                <button onclick={moveLeft}>←</button>
+                <button onclick={moveDown}>↓</button>
+                <button onclick={moveRight}>→</button>
+            </div>
+        </div>
+    </div>
 </div>
 
 <style>
-	:global(*, *::before, *::after) { box-sizing: border-box; margin: 0; padding: 0; }
+	.tetris-page {
+        position: relative;
+        width: 100%;
+        min-height: 100vh;
+        background-color: #07070f;
+        display: flex;
+        justify-content: center;
+        align-items: center;
+        padding: 20px;
+        box-sizing: border-box;
+        color: #fff;
+        font-family: 'Inter', system-ui, sans-serif;
+        overflow-x: hidden;
+    }
 
-	:global(body) {
-		background: #07070f;
-		color: #e0e0e0;
-		font-family: 'Courier New', Courier, monospace;
-		min-height: 100vh;
-		display: flex;
-		align-items: center;
-		justify-content: center;
-	}
-
-	/* ── App shell ── */
-	.app {
-		display: flex;
-		flex-direction: column;
-		gap: 12px;
-		padding: 16px;
-		width: fit-content;
-	}
+	.game-container {
+        display: flex;
+        flex-direction: column;
+        gap: 20px;
+        width: fit-content;
+        max-width: 100%;
+    }
 
 	/* ── Header ── */
 	header {
 		display: flex;
 		align-items: center;
 		justify-content: space-between;
+        padding-bottom: 10px;
 	}
 
 	.logo {
-		font-size: 1.6rem;
+		font-size: 1.8rem;
 		font-weight: 900;
-		letter-spacing: 0.25em;
+		letter-spacing: 0.2em;
 		background: linear-gradient(90deg, #ff4655, #ffe548, #00f5d4);
 		-webkit-background-clip: text;
 		-webkit-text-fill-color: transparent;
-		background-clip: text;
 	}
 
 	.sound-btn {
 		background: rgba(255,255,255,0.07);
 		border: 1px solid rgba(255,255,255,0.1);
 		border-radius: 8px;
-		padding: 6px 10px;
+		padding: 8px 12px;
 		cursor: pointer;
-		font-size: 1rem;
-		transition: background 0.2s;
+		font-size: 1.2rem;
 	}
-	.sound-btn:hover { background: rgba(255,255,255,0.14); }
-	.sound-btn.muted { opacity: 0.45; }
 
 	/* ── Main layout ── */
 	main {
 		display: flex;
-		gap: 16px;
+		gap: 24px;
 		align-items: flex-start;
 	}
 
 	/* ── Board ── */
 	.board-wrap {
 		position: relative;
-		border: 2px solid rgba(255,255,255,0.08);
-		border-radius: 4px;
+		border: 4px solid #1a1a2e;
+		border-radius: 8px;
 		overflow: hidden;
-		box-shadow:
-			0 0 30px rgba(0,245,212,0.08),
-			0 0 60px rgba(72,149,239,0.06);
+		box-shadow: 0 0 40px rgba(0,0,0,0.5);
 	}
 
 	canvas {
 		display: block;
+        background: #0d0d1a;
 	}
 
-	/* ── Overlay (start / game over) ── */
 	.overlay {
 		position: absolute;
 		inset: 0;
@@ -514,73 +514,40 @@
 		flex-direction: column;
 		align-items: center;
 		justify-content: center;
-		gap: 16px;
-		background: rgba(7,7,15,0.82);
-		backdrop-filter: blur(6px);
+		gap: 20px;
+		background: rgba(7,7,15,0.85);
+		backdrop-filter: blur(8px);
+        z-index: 10;
 	}
 
 	.over-title {
-		font-size: 2.4rem;
+		font-size: 2.5rem;
 		font-weight: 900;
-		letter-spacing: 0.18em;
+		text-align: center;
 		background: linear-gradient(90deg, #ff4655, #ffe548);
 		-webkit-background-clip: text;
 		-webkit-text-fill-color: transparent;
-		background-clip: text;
-		animation: pulse 1.4s ease-in-out infinite;
 	}
 
-	.over-score {
-		font-size: 1.1rem;
-		color: #aaa;
-		letter-spacing: 0.08em;
-	}
-
-	@keyframes pulse {
-		0%, 100% { opacity: 1; }
-		50%       { opacity: 0.6; }
-	}
-
-	/* ── Sidebar ── */
 	.sidebar {
 		display: flex;
 		flex-direction: column;
 		gap: 20px;
-		min-width: 130px;
+		width: 160px;
 	}
 
 	.score-box {
-		display: flex;
-		flex-direction: column;
-		gap: 4px;
-		background: rgba(255,255,255,0.04);
-		border: 1px solid rgba(255,255,255,0.07);
-		border-radius: 10px;
-		padding: 14px 18px;
+		background: #1a1a2e;
+		border: 1px solid rgba(255,255,255,0.1);
+		border-radius: 12px;
+		padding: 20px;
+		text-align: center;
 	}
 
-	.label {
-		font-size: 0.6rem;
-		letter-spacing: 0.3em;
-		color: #666;
-	}
+	.label { font-size: 0.7rem; color: #666; letter-spacing: 2px; }
+	.value { font-size: 2rem; font-weight: 900; color: #ffe548; display: block; }
 
-	.value {
-		font-size: 2rem;
-		font-weight: 900;
-		color: #ffe548;
-		text-shadow: 0 0 12px rgba(255,229,72,0.5);
-	}
-
-	.hint-box {
-		display: flex;
-		flex-direction: column;
-		gap: 6px;
-		font-size: 0.72rem;
-		color: #555;
-		line-height: 1.6;
-		padding: 0 2px;
-	}
+	.hint-box { color: #555; font-size: 0.8rem; line-height: 1.8; }
 
 	.pause-title {
 		background: linear-gradient(90deg, #00f5d4, #4895ef);
@@ -589,92 +556,58 @@
 		background-clip: text;
 	}
 
-	/* ── Button group ── */
 	.btn-group {
 		display: flex;
 		flex-direction: column;
 		gap: 8px;
 	}
 
-	.btn-pause {
-		background: rgba(255,255,255,0.07);
-		border: 1px solid rgba(255,255,255,0.15);
-		border-radius: 10px;
-		padding: 10px 24px;
-		font-family: inherit;
-		font-size: 0.9rem;
-		font-weight: 700;
-		letter-spacing: 0.06em;
-		color: #ddd;
-		cursor: pointer;
-		transition: background 0.2s, transform 0.1s;
-	}
-	.btn-pause:hover  { background: rgba(255,255,255,0.13); }
-	.btn-pause:active { transform: scale(0.97); }
-	.btn-pause.full   { width: 100%; }
-
-	/* ── Buttons ── */
 	.btn-play {
 		background: linear-gradient(135deg, #00f5d4, #4895ef);
+		color: #000;
 		border: none;
-		border-radius: 10px;
-		padding: 12px 24px;
-		font-family: inherit;
-		font-size: 1rem;
-		font-weight: 700;
-		letter-spacing: 0.08em;
-		color: #07070f;
+		border-radius: 8px;
+		padding: 14px;
+		font-weight: 800;
 		cursor: pointer;
-		transition: opacity 0.2s, transform 0.1s;
-		box-shadow: 0 0 20px rgba(0,245,212,0.3);
+		width: 100%;
 	}
-	.btn-play:hover  { opacity: 0.88; }
-	.btn-play:active { transform: scale(0.97); }
-	.btn-play.full   { width: 100%; }
 
 	/* ── Mobile controls ── */
 	.mobile-controls {
 		display: none;
 		flex-direction: column;
 		align-items: center;
-		gap: 8px;
+		gap: 10px;
+        margin-top: 10px;
 	}
 
-	.mobile-controls .row {
-		display: flex;
-		gap: 8px;
-	}
+	.mobile-controls .row { display: flex; gap: 10px; }
 
 	.mobile-controls button {
-		width: 52px;
-		height: 52px;
-		font-size: 1.3rem;
-		border-radius: 10px;
-		border: 1px solid rgba(255,255,255,0.12);
-		background: rgba(255,255,255,0.06);
-		color: #ddd;
-		cursor: pointer;
-		transition: background 0.15s;
-		-webkit-tap-highlight-color: transparent;
-		user-select: none;
+		width: 60px;
+		height: 60px;
+		background: #1a1a2e;
+		border: 1px solid #333;
+		color: #fff;
+		border-radius: 12px;
+		font-size: 1.5rem;
+        touch-action: manipulation;
 	}
-	.mobile-controls button:active { background: rgba(255,255,255,0.18); }
 
 	/* ── Responsive ── */
-	@media (max-width: 540px) {
+	@media (max-width: 600px) {
+        .tetris-page { padding: 10px; align-items: flex-start; }
 		main { flex-direction: column; align-items: center; }
-
-		canvas {
-			width: min(100vw - 24px, 300px) !important;
-			height: auto !important;
-		}
-
-		.sidebar { width: 100%; flex-direction: row; flex-wrap: wrap; }
-		.score-box { flex: 1; }
-		.hint-box  { display: none; }
-		.btn-group { flex: 1; flex-direction: row; flex-wrap: wrap; }
-		.btn-play.full, .btn-pause.full { flex: 1; }
-
-		.mobile-controls { display: flex; width: 100%; justify-content: center; }
+		.sidebar { width: 100%; flex-direction: row; justify-content: space-between; }
+        .hint-box { display: none; }
+        .score-box { padding: 10px; flex: 1; }
+        .btn-group { flex: 1; }
+		.mobile-controls { display: flex; }
+        
+        canvas {
+            width: 280px !important;
+            height: auto !important;
+        }
 	}
 </style>

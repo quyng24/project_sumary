@@ -93,350 +93,240 @@
 	}
 </script>
 
-<BackHome />
+<div class="excel-page-container">
+    
+    <header class="app-header">
+        <div class="header-left">
+            <BackHome />
+        </div>
+        <div class="header-center">
+            <div class="file-name">
+                <span class="icon">📊</span>
+                <h1>Svelte_Spreadsheet_2024.xlsx</h1>
+                <span class="tag">Auto-save on</span>
+            </div>
+        </div>
+        <div class="header-right">
+            <div class="user-badge">QC</div>
+        </div>
+    </header>
 
-<svelte:head>
-	<title>Excel Mini Demo</title>
-	<meta
-		name="description"
-		content="Mini spreadsheet demo với công thức cơ bản, công thức tham chiếu ô và giao diện nhập liệu dạng bảng."
-	/>
-</svelte:head>
+    <section class="formula-bar">
+        <div class="active-cell-display">{activeCellId ?? ''}</div>
+        <div class="fx-label">ƒx</div>
+        <input 
+            type="text" 
+            readonly
+            placeholder="Select a cell or enter formula starting with ="
+            value={activeCellId ? (cellsMap.get(activeCellId)?.value ?? '') : ''} 
+        />
+    </section>
 
-<section class="excel-page">
-	<header class="hero">
-		<div class="hero-copy">
-			<p class="eyebrow">SPREADSHEET DEMO</p>
-			<h1>Mini Excel để nhập dữ liệu và thử công thức ngay trong trình duyệt.</h1>
-			<p class="lede">
-				Hỗ trợ nhập giá trị thường, tham chiếu ô và một số hàm cơ bản như `SUM`, `AVERAGE`,
-				`MEDIAN`, `MIN`, `MAX`, `RANDOM`.
-			</p>
-		</div>
+    <main class="sheet-viewport">
+        <div class="grid-table">
+            <div class="label corner"></div>
+            
+            {#each letters as letter, i(i)}
+                <div class="label col-header">{letter}</div>
+            {/each}
 
-		<div class="formula-panel">
-			<div class="formula-meta">
-				<span class="meta-label">Cell</span>
-				<strong>{activeCellId ?? '--'}</strong>
-			</div>
-			<div class="formula-input">
-				<span class="meta-label">Formula</span>
-				<code>{activeCellId ? (cellsMap.get(activeCellId)?.value ?? '') : ''}</code>
-			</div>
-		</div>
-	</header>
+            {#each numbers as n, i (i)}
+                <div class="label row-header">{n}</div>
+                {#each letters as l, i(i)}
+                    {@const id = `${l}${n}`}
+                    {@const cell = cellsMap.get(id)}
+                    <div class="cell-unit" class:is-active={activeCellId === id}>
+                        <input
+                            type="text"
+                            value={activeCellId === id ? (cell?.value ?? '') : (cell?.display ?? '')}
+                            onfocus={() => (activeCellId = id)}
+                            onblur={() => (activeCellId = null)}
+                            onkeydown={(e) => e.key === 'Enter' && (e.target as HTMLInputElement).blur()}
+                            oninput={(e) => updateCell(id, e.currentTarget.value)}
+                        />
+                    </div>
+                {/each}
+            {/each}
+        </div>
+    </main>
 
-	<div class="sheet-card">
-		<div class="examples">
-			<span>=SUM(A1:A5)</span>
-			<span>=AVERAGE(B1,B2,B3)</span>
-			<span>=A1*B1+10</span>
-			<span>=RANDOM(1,100)</span>
-		</div>
-
-		<div class="sheet-scroll">
-			<div class="spreadsheet">
-				<div class="label corner"></div>
-				{#each letters as letter, index (index)}
-					<div class="label col-header">{letter}</div>
-				{/each}
-
-				{#each numbers as n, index (index)}
-					<div class="label row-header">{n}</div>
-					{#each letters as l, index (index)}
-						{@const id = `${l}${n}`}
-						{@const cell = cellsMap.get(id)}
-						<div class="cell-wrapper">
-							<input
-								type="text"
-								class:active={activeCellId === id}
-								value={activeCellId === id ? (cell?.value ?? '') : (cell?.display ?? '')}
-								placeholder={id}
-								onfocus={() => (activeCellId = id)}
-								onblur={() => (activeCellId = null)}
-								onkeydown={(e) => e.key === 'Enter' && (e.target as HTMLInputElement).blur()}
-								oninput={(e) => updateCell(id, e.currentTarget.value)}
-							/>
-						</div>
-					{/each}
-				{/each}
-			</div>
-		</div>
-	</div>
-</section>
-
-<div class="toolbar">
-	<div class="info">
-		<b>Selected:</b> {activeCellId ?? '--'}
-	</div>
-	<div class="help-grid">
-		<span>Range: `A1:A5`</span>
-		<span>Refs: `=A1+B2`</span>
-		<span>Press `Enter` to finish edit</span>
-	</div>
+    <footer class="footer-bar">
+        <div class="status">● System Ready</div>
+        <div class="zoom-level">100%</div>
+    </footer>
 </div>
 
 <style>
-	:global(body) {
-		margin: 0;
-		background:
-			radial-gradient(circle at top left, rgba(34, 197, 94, 0.12), transparent 24%),
-			radial-gradient(circle at top right, rgba(59, 130, 246, 0.12), transparent 26%),
-			linear-gradient(180deg, #07111b 0%, #0b1623 100%);
-		color: #f8fafc;
-		font-family:
-			'Inter',
-			system-ui,
-			sans-serif;
-	}
+    .excel-page-container {
+        --bg-main: #09090b;
+        --bg-side: #18181b;
+        --border: #27272a;
+        --accent: #10b981;
+        --text: #e4e4e7;
+        --text-dim: #71717a;
 
-	.excel-page {
-		min-height: 100vh;
-		box-sizing: border-box;
-		padding: 6.5rem 1.25rem 5rem;
-	}
+        position: fixed;
+        inset: 0;
+        display: flex;
+        flex-direction: column;
+        background-color: var(--bg-main);
+        color: var(--text);
+        font-family: 'Inter', system-ui, sans-serif;
+    }
 
-	.hero {
-		display: grid;
-		grid-template-columns: minmax(0, 1.4fr) minmax(280px, 0.8fr);
-		gap: 1.25rem;
-		width: min(1180px, 100%);
-		margin: 0 auto 1.25rem;
-	}
+    .app-header {
+        height: 56px;
+        display: flex;
+        align-items: center;
+        justify-content: space-between;
+        padding: 0 1rem;
+        background: var(--bg-side);
+        border-bottom: 1px solid var(--border);
+    }
 
-	.hero-copy,
-	.formula-panel,
-	.sheet-card {
-		border: 1px solid rgba(148, 163, 184, 0.14);
-		border-radius: 24px;
-		background: rgba(15, 23, 42, 0.72);
-		backdrop-filter: blur(16px);
-		box-shadow: 0 24px 60px rgba(0, 0, 0, 0.24);
-	}
+    .header-left {
+        min-width: 120px;
+        padding-left: 0.5rem; 
+    }
 
-	.hero-copy {
-		padding: 1.6rem;
-	}
+    .header-center {
+        flex: 1;
+        display: flex;
+        justify-content: center;
+    }
 
-	.eyebrow {
-		margin: 0 0 0.85rem;
-		color: #86efac;
-		font-size: 0.8rem;
-		font-weight: 800;
-		letter-spacing: 0.18em;
-	}
+    .file-name {
+        display: flex;
+        align-items: center;
+        gap: 0.75rem;
+        background: #00000040;
+        padding: 0.4rem 1rem;
+        border-radius: 8px;
+        border: 1px solid var(--border);
+    }
 
-	h1 {
-		margin: 0;
-		font-size: clamp(2rem, 5vw, 3.4rem);
-		line-height: 1.02;
-		letter-spacing: -0.05em;
-	}
+    .file-name h1 { font-size: 0.85rem; font-weight: 500; margin: 0; color: var(--text); }
+    .tag { font-size: 0.6rem; color: var(--accent); font-weight: 700; text-transform: uppercase; }
 
-	.lede {
-		margin: 1rem 0 0;
-		max-width: 48rem;
-		color: #cbd5e1;
-		font-size: 1rem;
-		line-height: 1.7;
-	}
+    .user-badge {
+        width: 32px;
+        height: 32px;
+        background: var(--accent);
+        color: #064e3b;
+        border-radius: 50%;
+        display: flex;
+        align-items: center;
+        justify-content: center;
+        font-size: 0.75rem;
+        font-weight: 700;
+    }
 
-	.formula-panel {
-		display: grid;
-		gap: 1rem;
-		padding: 1.25rem;
-		align-content: start;
-	}
+    .formula-bar {
+        height: 38px;
+        display: flex;
+        align-items: center;
+        background: var(--bg-side);
+        border-bottom: 1px solid var(--border);
+    }
 
-	.formula-meta,
-	.formula-input {
-		display: grid;
-		gap: 0.4rem;
-	}
+    .active-cell-display {
+        width: 70px;
+        text-align: center;
+        font-family: monospace;
+        color: var(--accent);
+        font-weight: 600;
+        border-right: 1px solid var(--border);
+    }
 
-	.meta-label {
-		color: #94a3b8;
-		font-size: 0.78rem;
-		font-weight: 700;
-		letter-spacing: 0.1em;
-		text-transform: uppercase;
-	}
+    .fx-label {
+        width: 40px;
+        text-align: center;
+        font-style: italic;
+        color: var(--text-dim);
+        font-family: serif;
+        font-size: 1.1rem;
+    }
 
-	.formula-panel strong,
-	.formula-panel code {
-		color: #f8fafc;
-	}
+    .formula-bar input {
+        flex: 1;
+        background: transparent;
+        border: none;
+        color: var(--text);
+        padding: 0 1rem;
+        font-size: 0.85rem;
+        outline: none;
+        font-family: 'JetBrains Mono', monospace;
+    }
 
-	.formula-panel code {
-		display: block;
-		min-height: 2.5rem;
-		padding: 0.85rem 1rem;
-		border: 1px solid rgba(148, 163, 184, 0.14);
-		border-radius: 16px;
-		background: rgba(2, 6, 23, 0.55);
-		font-family:
-			'SFMono-Regular',
-			Consolas,
-			monospace;
-		white-space: nowrap;
-		overflow: auto;
-	}
+    .sheet-viewport {
+        flex: 1;
+        overflow: auto;
+        background: var(--bg-main);
+    }
 
-	.sheet-card {
-		width: min(1180px, 100%);
-		margin: 0 auto;
-		padding: 1rem;
-	}
+    .grid-table {
+        display: grid;
+        grid-template-columns: 50px repeat(10, 130px);
+        width: max-content;
+    }
 
-	.examples {
-		display: flex;
-		flex-wrap: wrap;
-		gap: 0.65rem;
-		margin-bottom: 1rem;
-	}
+    .label {
+        background: #111113;
+        color: var(--text-dim);
+        font-size: 0.7rem;
+        font-weight: 600;
+        display: flex;
+        align-items: center;
+        justify-content: center;
+        border-right: 1px solid var(--border);
+        border-bottom: 1px solid var(--border);
+        position: sticky;
+        user-select: none;
+    }
 
-	.examples span {
-		padding: 0.55rem 0.8rem;
-		border: 1px solid rgba(148, 163, 184, 0.14);
-		border-radius: 999px;
-		background: rgba(30, 41, 59, 0.8);
-		color: #cbd5e1;
-		font-family:
-			'SFMono-Regular',
-			Consolas,
-			monospace;
-		font-size: 0.84rem;
-	}
+    .col-header { top: 0; height: 32px; z-index: 10; }
+    .row-header { left: 0; width: 50px; z-index: 10; }
+    .corner { top: 0; left: 0; z-index: 20; background: #27272a; }
 
-	.sheet-scroll {
-		overflow: auto;
-		max-height: calc(100vh - 19rem);
-		border: 1px solid rgba(148, 163, 184, 0.12);
-		border-radius: 18px;
-		background: #0f172a;
-	}
+    .cell-unit {
+        height: 32px;
+        border-right: 1px solid var(--border);
+        border-bottom: 1px solid var(--border);
+        background: transparent;
+        transition: background 0.1s;
+    }
 
-	.spreadsheet {
-		display: grid;
-		grid-template-columns: 56px repeat(10, 138px);
-		width: max-content;
-		min-width: 100%;
-	}
+    .cell-unit.is-active {
+        box-shadow: inset 0 0 0 2px var(--accent);
+        z-index: 5;
+        background: #10b98105;
+    }
 
-	.label {
-		position: sticky;
-		display: flex;
-		align-items: center;
-		justify-content: center;
-		height: 38px;
-		border: 0.5px solid #334155;
-		background: #162233;
-		color: #94a3b8;
-		font-size: 12px;
-		font-weight: 800;
-	}
+    .cell-unit input {
+        width: 100%;
+        height: 100%;
+        border: none;
+        background: transparent;
+        color: #fff;
+        padding: 0 10px;
+        font-size: 0.85rem;
+        outline: none;
+    }
 
-	.col-header {
-		top: 0;
-		z-index: 10;
-	}
+    .footer-bar {
+        height: 24px;
+        background: var(--accent);
+        color: #064e3b;
+        display: flex;
+        justify-content: space-between;
+        align-items: center;
+        padding: 0 1rem;
+        font-size: 0.65rem;
+        font-weight: 800;
+    }
 
-	.row-header {
-		left: 0;
-		z-index: 10;
-		width: 56px;
-	}
-
-	.corner {
-		top: 0;
-		left: 0;
-		z-index: 20;
-		background: #0b1220;
-	}
-
-	.cell-wrapper {
-		height: 38px;
-		border: 0.5px solid #334155;
-		background: #132033;
-	}
-
-	input {
-		width: 100%;
-		height: 100%;
-		border: none;
-		padding: 0 10px;
-		box-sizing: border-box;
-		background: transparent;
-		color: #e2e8f0;
-		outline: none;
-		font-size: 13px;
-	}
-
-	input::placeholder {
-		color: #475569;
-	}
-
-	input.active {
-		background: #0f172a;
-		box-shadow: inset 0 0 0 2px #22c55e;
-		color: #fff;
-	}
-
-	.toolbar {
-		position: fixed;
-		right: 0;
-		bottom: 0;
-		left: 0;
-		display: flex;
-		justify-content: space-between;
-		gap: 1rem;
-		padding: 0.85rem 1.25rem;
-		border-top: 1px solid rgba(148, 163, 184, 0.14);
-		background: rgba(15, 23, 42, 0.92);
-		backdrop-filter: blur(14px);
-		font-size: 13px;
-		z-index: 100;
-	}
-
-	.help-grid {
-		display: flex;
-		flex-wrap: wrap;
-		gap: 1rem;
-		color: #94a3b8;
-		font-family:
-			'SFMono-Regular',
-			Consolas,
-			monospace;
-	}
-
-	@media (max-width: 900px) {
-		.hero {
-			grid-template-columns: 1fr;
-		}
-
-		.sheet-scroll {
-			max-height: calc(100vh - 23rem);
-		}
-	}
-
-	@media (max-width: 640px) {
-		.excel-page {
-			padding: 5.6rem 0.85rem 5.5rem;
-		}
-
-		.hero-copy,
-		.formula-panel,
-		.sheet-card {
-			border-radius: 18px;
-		}
-
-		.sheet-card {
-			padding: 0.8rem;
-		}
-
-		.toolbar {
-			flex-direction: column;
-			align-items: flex-start;
-		}
-	}
+    /* Scrollbar */
+    .sheet-viewport::-webkit-scrollbar { width: 12px; height: 12px; }
+    .sheet-viewport::-webkit-scrollbar-track { background: var(--bg-main); }
+    .sheet-viewport::-webkit-scrollbar-thumb { background: #3f3f46; border: 3px solid var(--bg-main); border-radius: 10px; }
 </style>
