@@ -1,341 +1,324 @@
 <script lang="ts">
-	let { value } = $props();
+	import { untrack } from 'svelte';
 
-	// Giá trị đang hiển thị hoàn chỉnh
-	let currentValue = $state(value);
+	let { value = '0' }: { value: string } = $props();
 
-	// Trạng thái animation
+	// Lưu trữ digit hiện tại và digit tiếp theo (dùng untrack để đồng bộ khởi tạo an toàn)
+	let currentDigit = $state(untrack(() => value));
+	let nextDigit = $state(untrack(() => value));
 	let isFlipping = $state(false);
 
-	/*
-	 * Khi value từ component cha thay đổi,
-	 * bắt đầu animation.
-	 */
 	$effect(() => {
-		if (value === currentValue) return;
-
-		if (!isFlipping) {
+		const target = value;
+		// Khi giá trị mới đến khác với digit đang hiển thị
+		if (target !== currentDigit && !isFlipping) {
+			nextDigit = target;
 			isFlipping = true;
 		}
 	});
 
-	/*
-	 * Animation kết thúc.
-	 *
-	 * Lúc này toàn bộ card NEXT đã hiển thị,
-	 * nên chỉ cần chuyển currentValue sang value.
-	 */
 	function handleAnimationEnd() {
-		currentValue = value;
+		currentDigit = nextDigit;
 		isFlipping = false;
 	}
 </script>
 
-<div class="digit-container">
+<div class="digit-card" aria-label={`Digit ${currentDigit}`}>
 	<!-- ==========================================
-	     CURRENT
+	     1. CÁC NỬA THẺ TĨNH NỀN (BACKGROUND CARDS)
 	     ========================================== -->
 
-	<!-- Nửa trên của số hiện tại -->
-	<div class="card top current-top">
-		<span>{currentValue}</span>
+	<!-- Nửa trên tĩnh: Hiển thị trước NEXT digit (sẽ lộ ra khi flap gập xuống) -->
+	<div class="card-half top static-top">
+		<span class="digit-num">{nextDigit}</span>
+		<!-- Bóng tối dần tan khi lá lật rời đi -->
+		<div class="shadow-layer shadow-under" class:active={isFlipping}></div>
 	</div>
 
-	<!-- Nửa dưới của số hiện tại -->
-	<div class="card bottom current-bottom">
-		<span>{currentValue}</span>
-	</div>
-
-	<!-- ==========================================
-	     NEXT
-	     ========================================== -->
-
-	<!-- Nửa trên của số tiếp theo -->
-	<div class="card top next-top">
-		<span>{value}</span>
-	</div>
-
-	<!-- Nửa dưới của số tiếp theo -->
-	<div class="card bottom next-bottom">
-		<span>{value}</span>
+	<!-- Nửa dưới tĩnh: Giữ CURRENT digit (chờ lá lật úp đè lên) -->
+	<div class="card-half bottom static-bottom">
+		<span class="digit-num">{currentDigit}</span>
+		<!-- Bóng tối dần đậm khi lá lật tiếp cận -->
+		<div class="shadow-layer shadow-bottom-ambient" class:active={isFlipping}></div>
 	</div>
 
 	<!-- ==========================================
-	     FLIP LEAF
+	     2. LÁ LẬT VẬT LÝ 3D (DYNAMIC FLIPPING LEAF)
 	     ========================================== -->
+	{#if isFlipping}
+		<div class="flip-leaf" onanimationend={handleAnimationEnd}>
+			<!-- Mặt trước: Nửa trên CURRENT (lật từ 0° úp về phía trước đến -90°) -->
+			<div class="leaf-face front">
+				<span class="digit-num">{currentDigit}</span>
+				<!-- Bóng đổ khi ngả dần khỏi ánh sáng trần -->
+				<div class="shadow-layer shadow-front"></div>
+			</div>
 
-	<div
-		class="flip-leaf"
-		class:flipping={isFlipping}
-		onanimationend={handleAnimationEnd}
-	>
-		<!-- Mặt trước: current TOP -->
-		<div class="leaf-face leaf-front">
-			<span>{currentValue}</span>
+			<!-- Mặt sau: Nửa dưới NEXT (từ -90° tiếp tục rơi đập xuống -180°) -->
+			<div class="leaf-face back">
+				<span class="digit-num">{nextDigit}</span>
+				<!-- Bóng mờ dần sáng khi tiếp đất phẳng -->
+				<div class="shadow-layer shadow-back"></div>
+			</div>
 		</div>
+	{/if}
 
-		<!-- Mặt sau: next BOTTOM -->
-		<div class="leaf-face leaf-back">
-			<span>{value}</span>
-		</div>
-	</div>
+	<!-- ==========================================
+	     3. CHI TIẾT CƠ KHÍ (SPLIT-FLAP DETAILS)
+	     ========================================== -->
+	<!-- Rãnh khe hở ngang chính giữa -->
+	<div class="crease-gap"></div>
 
-	<!-- Đường giữa -->
-	<div class="center-line"></div>
+	<!-- Chốt bản lề hai bên (Side hinge notches) -->
+	<div class="hinge-notch hinge-left"></div>
+	<div class="hinge-notch hinge-right"></div>
 </div>
 
 <style>
-	.digit-container {
-		--w: clamp(70px, 15vw, 140px);
-		--h: calc(var(--w) * 1.4);
+	.digit-card {
+		--card-w: clamp(50px, 12vw, 130px);
+		--card-h: calc(var(--card-w) * 1.42);
 		--radius: 8px;
-		--anim-speed: 0.6s;
+		--anim-dur: 0.52s;
 
 		position: relative;
-
-		width: var(--w);
-		height: var(--h);
-
-		background: #111;
-
-		border-radius: var(--radius);
-
-		font-size: calc(var(--w) * 1.1);
-		font-weight: 700;
-
-		line-height: var(--h);
-
-		font-family: 'JetBrains Mono', monospace;
-
+		width: var(--card-w);
+		height: var(--card-h);
 		perspective: 1000px;
-
-		overflow: hidden;
+		-webkit-perspective: 1000px;
+		border-radius: var(--radius);
+		user-select: none;
+		box-shadow: 
+			0 12px 28px rgba(0, 0, 0, 0.65),
+			0 2px 6px rgba(0, 0, 0, 0.4);
 	}
 
 	/* =================================================
-	   CARD BASE
+	   NỬA THẺ CƠ BẢN
 	   ================================================= */
-
-	.card {
+	.card-half {
 		position: absolute;
-
 		left: 0;
-
 		width: 100%;
 		height: 50%;
-
 		overflow: hidden;
-
-		background: #1a1a1a;
-
-		backface-visibility: hidden;
+		box-sizing: border-box;
 	}
 
-	.card span,
-	.flip-leaf span {
+	.digit-num {
 		position: absolute;
-
 		left: 50%;
-
 		width: 100%;
-
+		height: var(--card-h);
+		line-height: var(--card-h);
 		text-align: center;
-
 		transform: translateX(-50%);
+		font-family: -apple-system, BlinkMacSystemFont, "SF Pro Display", "Plus Jakarta Sans", "Inter", sans-serif;
+		font-size: calc(var(--card-w) * 1.05);
+		font-weight: 800;
+		font-variant-numeric: tabular-nums;
+		font-feature-settings: "tnum";
+		letter-spacing: -0.02em;
+		color: #f1f5f9;
+		text-shadow: 0 1px 3px rgba(0, 0, 0, 0.6);
 	}
 
-	/* =================================================
-	   TOP
-	   ================================================= */
-
+	/* Nửa trên */
 	.top {
 		top: 0;
-
 		border-radius: var(--radius) var(--radius) 0 0;
-
-		border-bottom: 1px solid rgba(0, 0, 0, 0.5);
+		background: linear-gradient(180deg, #252528 0%, #1a1a1c 100%);
+		border: 1px solid rgba(255, 255, 255, 0.08);
+		border-bottom: 1px solid rgba(0, 0, 0, 0.65);
 	}
 
-	.top span {
+	.top .digit-num {
 		top: 0;
 	}
 
-	/* =================================================
-	   BOTTOM
-	   ================================================= */
-
+	/* Nửa dưới */
 	.bottom {
 		bottom: 0;
-
 		border-radius: 0 0 var(--radius) var(--radius);
+		background: linear-gradient(180deg, #18181a 0%, #111113 100%);
+		border: 1px solid rgba(255, 255, 255, 0.08);
+		border-top: 1px solid rgba(255, 255, 255, 0.04);
 	}
 
-	.bottom span {
+	.bottom .digit-num {
 		bottom: 0;
 	}
 
-	/* =================================================
-	   LAYER ORDER
-	   ================================================= */
-
-	/*
-	 * CURRENT là nền.
-	 */
-	.current-top {
+	/* Layering */
+	.static-top {
 		z-index: 1;
 	}
 
-	.current-bottom {
+	.static-bottom {
 		z-index: 1;
 	}
 
-	/*
-	 * NEXT nằm phía dưới.
-	 *
-	 * Chúng ta sẽ cho NEXT xuất hiện
-	 * thông qua animation.
-	 */
-	.next-top {
-		z-index: 0;
-	}
-
-	.next-bottom {
-		z-index: 0;
-	}
-
 	/* =================================================
-	   FLIP LEAF
+	   LÁ LẬT VẬT LÝ 3D (FLIP LEAF)
 	   ================================================= */
-
 	.flip-leaf {
 		position: absolute;
-
 		top: 0;
 		left: 0;
-
 		width: 100%;
 		height: 50%;
-
-		z-index: 5;
-
+		z-index: 10;
 		transform-origin: bottom center;
-
 		transform-style: preserve-3d;
-
-		transform: rotateX(0deg);
+		-webkit-transform-style: preserve-3d;
+		animation: macbook-flap-fall var(--anim-dur) cubic-bezier(0.35, 0.05, 0.25, 1) forwards;
+		will-change: transform;
 	}
 
 	.leaf-face {
 		position: absolute;
-
 		inset: 0;
-
 		width: 100%;
 		height: 100%;
-
 		overflow: hidden;
-
-		background: #1a1a1a;
-
 		backface-visibility: hidden;
-
-		transform-style: preserve-3d;
+		-webkit-backface-visibility: hidden;
+		box-sizing: border-box;
 	}
 
-	/* Mặt trước */
-	.leaf-front {
+	/* Mặt trước: Current Top */
+	.leaf-face.front {
 		border-radius: var(--radius) var(--radius) 0 0;
-
+		background: linear-gradient(180deg, #252528 0%, #1a1a1c 100%);
+		border: 1px solid rgba(255, 255, 255, 0.08);
+		border-bottom: 1px solid rgba(0, 0, 0, 0.65);
 		z-index: 2;
-
-		box-shadow:
-			inset 0 -10px 30px rgba(0, 0, 0, 0.15);
 	}
 
-	.leaf-front span {
+	.leaf-face.front .digit-num {
 		top: 0;
 	}
 
-	/* Mặt sau */
-	.leaf-back {
+	/* Mặt sau: Next Bottom */
+	.leaf-face.back {
 		transform: rotateX(180deg);
-
 		border-radius: 0 0 var(--radius) var(--radius);
+		background: linear-gradient(180deg, #18181a 0%, #111113 100%);
+		border: 1px solid rgba(255, 255, 255, 0.08);
+		border-top: 1px solid rgba(255, 255, 255, 0.04);
+		z-index: 1;
 	}
 
-	.leaf-back span {
+	.leaf-face.back .digit-num {
 		bottom: 0;
 	}
 
 	/* =================================================
-	   ANIMATION
+	   QUỸ ĐẠO VẬT LÝ & HIỆU ỨNG ÁNH SÁNG MACBOOK
 	   ================================================= */
-
-	.flip-leaf.flipping {
-		animation:
-			flip-down var(--anim-speed)
-			cubic-bezier(0.4, 0, 0.2, 1)
-			forwards;
-	}
-
-	@keyframes flip-down {
+	@keyframes macbook-flap-fall {
 		0% {
 			transform: rotateX(0deg);
 		}
-
+		46% {
+			transform: rotateX(-90deg);
+		}
+		78% {
+			transform: rotateX(-182.5deg);
+		}
+		88% {
+			transform: rotateX(-179deg);
+		}
 		100% {
 			transform: rotateX(-180deg);
 		}
 	}
 
-	/* =================================================
-	   NEXT LAYER
-	   ================================================= */
-
-	/*
-	 * Khi bắt đầu flip:
-	 *
-	 * NEXT TOP phải nằm phía sau leaf.
-	 *
-	 * Sau khi leaf đi qua 90deg,
-	 * mặt sau của leaf sẽ che/hiện đúng phần cần thiết.
-	 */
-
-	.flipping .next-top {
-		z-index: 2;
-	}
-
-	.flipping .next-bottom {
-		z-index: 1;
-	}
-
-	/* =================================================
-	   CURRENT LAYER
-	   ================================================= */
-
-	.flipping .current-bottom {
-		z-index: 1;
-	}
-
-	.flipping .current-top {
-		z-index: 0;
-	}
-
-	/* =================================================
-	   CENTER LINE
-	   ================================================= */
-
-	.center-line {
+	/* Lớp phủ bóng đổ động (Lighting & Shadows) */
+	.shadow-layer {
 		position: absolute;
+		inset: 0;
+		pointer-events: none;
+		opacity: 0;
+	}
 
-		top: 50%;
+	.shadow-front {
+		background: linear-gradient(180deg, rgba(0, 0, 0, 0.1) 0%, rgba(0, 0, 0, 0.8) 100%);
+		animation: front-shadow-darken var(--anim-dur) ease-in forwards;
+	}
+
+	@keyframes front-shadow-darken {
+		0% { opacity: 0; }
+		45% { opacity: 0.75; }
+		100% { opacity: 0.75; }
+	}
+
+	.shadow-back {
+		background: linear-gradient(180deg, rgba(0, 0, 0, 0.8) 0%, rgba(0, 0, 0, 0.1) 100%);
+		animation: back-shadow-lighten var(--anim-dur) ease-out forwards;
+	}
+
+	@keyframes back-shadow-lighten {
+		0% { opacity: 0.8; }
+		50% { opacity: 0.6; }
+		100% { opacity: 0; }
+	}
+
+	.shadow-under.active {
+		background: linear-gradient(180deg, rgba(0, 0, 0, 0.65) 0%, rgba(0, 0, 0, 0.1) 100%);
+		animation: under-shadow-reveal var(--anim-dur) ease-out forwards;
+	}
+
+	@keyframes under-shadow-reveal {
+		0% { opacity: 0.7; }
+		50% { opacity: 0.3; }
+		100% { opacity: 0; }
+	}
+
+	.shadow-bottom-ambient.active {
+		background: linear-gradient(180deg, rgba(0, 0, 0, 0.8) 0%, rgba(0, 0, 0, 0.2) 100%);
+		animation: ambient-shadow-incoming var(--anim-dur) ease-in forwards;
+	}
+
+	@keyframes ambient-shadow-incoming {
+		0% { opacity: 0; }
+		50% { opacity: 0.15; }
+		85% { opacity: 0.5; }
+		100% { opacity: 0; }
+	}
+
+	/* =================================================
+	   KHE HỞ TRUNG TÂM VÀ CHỐT BẢN LỀ (HINGES)
+	   ================================================= */
+	.crease-gap {
+		position: absolute;
+		top: calc(50% - 0.75px);
 		left: 0;
+		right: 0;
+		height: 1.5px;
+		background: #09090b;
+		z-index: 25;
+		box-shadow: 0 1px 1px rgba(255, 255, 255, 0.05);
+	}
 
-		width: 100%;
-		height: 1px;
+	.hinge-notch {
+		position: absolute;
+		top: 50%;
+		width: 4px;
+		height: 8px;
+		background: #09090b;
+		transform: translateY(-50%);
+		z-index: 26;
+		box-shadow: inset 0 0 2px rgba(255, 255, 255, 0.1);
+	}
 
-		background: rgba(0, 0, 0, 0.7);
+	.hinge-left {
+		left: -1px;
+		border-radius: 0 2px 2px 0;
+	}
 
-		z-index: 20;
+	.hinge-right {
+		right: -1px;
+		border-radius: 2px 0 0 2px;
 	}
 </style>
